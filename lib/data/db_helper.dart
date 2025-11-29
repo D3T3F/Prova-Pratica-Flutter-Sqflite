@@ -54,8 +54,6 @@ class DbHelper {
 
     final result = await db.query(tableName, orderBy: 'criadoEm DESC');
 
-    if(result.isEmpty) return [];
-
     return result.map((e) => Task.fromMap(e)).toList();
   }
 

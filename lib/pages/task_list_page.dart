@@ -12,15 +12,20 @@ class TaskListPage extends StatefulWidget {
   State<TaskListPage> createState() => _TaskListPageState();
 }
 
+enum SortMode { date, priority, urgency }
+
 class _TaskListPageState extends State<TaskListPage> {
   final DbHelper _db = DbHelper.instance;
   List<Task> _tasks = [];
   bool _loading = true;
 
+  bool _isSortReverse = false;
+  SortMode _sortMode = SortMode.date;
+
   final priorityIcons = {
-    PriorityType.low: Icons.arrow_downward,
-    PriorityType.medium: Icons.drag_handle,
-    PriorityType.high: Icons.warning,
+    PriorityType.low: Icons.info_outline,
+    PriorityType.medium: Icons.error,
+    PriorityType.high: Icons.warning_rounded,
   };
 
   @override
@@ -34,6 +39,8 @@ class _TaskListPageState extends State<TaskListPage> {
     setState(() => _loading = true);
 
     final tasks = await _db.getAllTasks();
+
+    _applySort(tasks, _sortMode);
 
     setState(() {
       _tasks = tasks;
@@ -72,12 +79,37 @@ class _TaskListPageState extends State<TaskListPage> {
     final scheme = Theme.of(context).colorScheme;
 
     final priorityColorMap = {
-      PriorityType.low: scheme.primary,
-      PriorityType.medium: scheme.secondary,
+      PriorityType.low: scheme.secondary,
+      PriorityType.medium: scheme.primary,
       PriorityType.high: scheme.error,
     };
 
     return priorityColorMap[prioridade] ?? scheme.primary;
+  }
+
+  void _applySort(List<Task> list, SortMode mode) {
+    _isSortReverse = (mode == _sortMode) ? !_isSortReverse : false;
+    _sortMode = mode;
+
+    list.sort((a, b) {
+      var result = 0;
+
+      switch (mode) {
+        case SortMode.date:
+          result = b.criadoEm.compareTo(a.criadoEm);
+          break;
+
+        case SortMode.priority:
+          result = b.prioridade.index.compareTo(a.prioridade.index);
+          break;
+
+        case SortMode.urgency:
+          result = b.nivelUrgencia.index.compareTo(a.nivelUrgencia.index);
+          break;
+      }
+
+      return _isSortReverse ? -result : result;
+    });
   }
 
   @override
@@ -89,6 +121,30 @@ class _TaskListPageState extends State<TaskListPage> {
         title: const Text('Tarefas Profissionais'),
         backgroundColor: scheme.primary,
         foregroundColor: scheme.onPrimary,
+        actions: [
+          PopupMenuButton<SortMode>(
+            icon: const Icon(Icons.sort),
+            onSelected: (mode) {
+              setState(() {
+                _applySort(_tasks, mode);
+              });
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: SortMode.date,
+                child: Text('Ordenar por data'),
+              ),
+              PopupMenuItem(
+                value: SortMode.priority,
+                child: Text('Ordenar por prioridade'),
+              ),
+              PopupMenuItem(
+                value: SortMode.urgency,
+                child: Text('Ordenar por urgência'),
+              ),
+            ],
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openForm(),
@@ -112,26 +168,34 @@ class _TaskListPageState extends State<TaskListPage> {
                     child: const Icon(Icons.delete, color: Colors.white),
                   ),
                   onDismissed: (_) => _deleteTask(task),
-                  child: ListTile(
-                    title: Text(task.titulo),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(task.descricao),
-                        Text('Criado em: ${_formatDate(task.criadoEm)}'),
-                        Text(
-                          'Nível urgência: ${urgencyMap[task.nivelUrgencia]}',
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text(task.titulo),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(task.descricao),
+                            Text('Criado em: ${_formatDate(task.criadoEm)}'),
+                            Text(
+                              'Nível urgência: ${urgencyMap[task.nivelUrgencia]}',
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    leading: CircleAvatar(
-                      backgroundColor: _priorityColor(task.prioridade, context),
-                      child: Icon(
-                        priorityIcons[task.prioridade],
-                        color: Colors.white,
+                        leading: CircleAvatar(
+                          backgroundColor: _priorityColor(
+                            task.prioridade,
+                            context,
+                          ),
+                          child: Icon(
+                            priorityIcons[task.prioridade],
+                            color: Colors.white,
+                          ),
+                        ),
+                        onTap: () => _openForm(task: task),
                       ),
-                    ),
-                    onTap: () => _openForm(task: task),
+                      if (index != _tasks.length - 1) const Divider(),
+                    ],
                   ),
                 );
               },
