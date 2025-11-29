@@ -1,10 +1,13 @@
+import 'enum/priority_type.dart';
+import 'enum/urgency_type.dart';
+
 class Task {
   int? id;
   String titulo;
   String descricao;
-  int prioridade;
+  PriorityType prioridade;
   DateTime criadoEm;
-  int nivelUrgencia;
+  UrgencyType nivelUrgencia;
 
   Task({
     this.id,
@@ -19,9 +22,9 @@ class Task {
     final map = <String, dynamic>{
       'titulo': titulo,
       'descricao': descricao,
-      'prioridade': prioridade,
+      'prioridade': prioridade.index,
       'criadoEm': criadoEm.toIso8601String(),
-      'nivelUrgencia': nivelUrgencia,
+      'nivelUrgencia': nivelUrgencia.index,
     };
 
     if (id != null) map['id'] = id;
@@ -34,9 +37,9 @@ class Task {
       id: map['id'] as int?,
       titulo: map['titulo'] as String,
       descricao: map['descricao'] as String,
-      prioridade: map['prioridade'] as int,
+      prioridade: PriorityType.values[map['prioridade']],
       criadoEm: DateTime.parse(map['criadoEm'] as String),
-      nivelUrgencia: map['nivelUrgencia'] as int,
+      nivelUrgencia: UrgencyType.values[map['nivelUrgencia']],
     );
   }
 }

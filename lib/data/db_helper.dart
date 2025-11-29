@@ -18,7 +18,7 @@ class DbHelper {
     if (_database != null) return _database!;
 
     _database = await _initDatabase();
-    
+
     return _database!;
   }
 
@@ -27,11 +27,7 @@ class DbHelper {
 
     final path = '${dir.path}/$_dbName';
 
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _onCreate,
-    );
+    return await openDatabase(path, version: 1, onCreate: _onCreate);
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -41,9 +37,42 @@ class DbHelper {
         titulo TEXT NOT NULL,
         descricao TEXT NOT NULL,
         prioridade INTEGER NOT NULL,
-        criadoEm TEXT NOT NULL
-        nivelUrgencia INTEGER NOT NULL,
+        criadoEm TEXT NOT NULL,
+        nivelUrgencia INTEGER NOT NULL
       )
     ''');
+  }
+
+  Future<int> insertTask(Task task) async {
+    final db = await database;
+
+    return await db.insert(tableName, task.toMap());
+  }
+
+  Future<List<Task>> getAllTasks() async {
+    final db = await database;
+
+    final result = await db.query(tableName, orderBy: 'criadoEm DESC');
+
+    if(result.isEmpty) return [];
+
+    return result.map((e) => Task.fromMap(e)).toList();
+  }
+
+  Future<int> updateTask(Task task) async {
+    final db = await database;
+
+    return await db.update(
+      tableName,
+      task.toMap(),
+      where: 'id = ?',
+      whereArgs: [task.id],
+    );
+  }
+
+  Future<int> deleteTask(int id) async {
+    final db = await database;
+
+    return await db.delete(tableName, where: 'id = ?', whereArgs: [id]);
   }
 }
