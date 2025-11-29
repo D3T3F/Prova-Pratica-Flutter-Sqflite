@@ -8,6 +8,20 @@ O tema central é o **Cadastro de Tarefas Profissionais**, onde cada tarefa poss
 
 ---
 
+## Dados do Aluno
+| | |
+| :--- | :--- |
+| Nome | David Teixeira Ferraz |
+| RA | 202310115 |
+
+---
+
+## Dificuldade Encontrada
+
+A única dificuldade encontrada foi realizar a extração do arquivo .db de dentro dos arquivos do aplicativo no emulador android. Tirando esse processo, não encontrei nenhuma outra dificuldade.
+
+---
+
 ## Requisitos Técnicos
 
 O desenvolvimento seguiu os seguintes requisitos técnicos:
@@ -40,7 +54,7 @@ A tabela principal de tarefas (`tarefas`) foi estruturada para armazenar as info
 ## Funcionalidades
 
 - **Criação de Tarefa:** Formulário para inserção de novas tarefas com validação de campos.
-- **Listagem de Tarefas:** Exibição de todas as tarefas cadastradas em uma lista dinâmica (`ListView.builder`).
+- **Listagem de Tarefas:** Exibição de todas as tarefas cadastradas em uma lista dinâmica (`ListView.builder`). Além de opção para filtrar por data, urgência e prioridade.
 - **Edição de Tarefa:** Opção para modificar os dados de uma tarefa existente.
 - **Exclusão de Tarefa:** Remoção permanente de uma tarefa do banco de dados.
 
